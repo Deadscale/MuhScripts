@@ -1,7 +1,7 @@
 require("libs.ScriptConfig")
 require("libs.Utils")
 require("libs.SideMessage")
-require("libs.TargetFindPercent")
+require("libs.TargetFind")
 
 config = ScriptConfig.new()
 config:SetParameter("Sunder", "Z", config.TYPE_HOTKEY) -- Change me if you don't like Z as the hotkey
@@ -43,8 +43,8 @@ function Tick()
     if me.alive and not me:IsChanneling() then
         local Sunder = me:GetAbility(4)
         if activ and Sunder.level > 0 then
-                local victim = targetFind:GetHighestPercentTBlade(250)
-                if me.health/me.maxHealth < myhp then
+                local victim = targetFind:GetHighestPercentHP(250,true,true)
+                if me.health/me.maxHealth < myhp and victim and victim.alive then
                     me:SafeCastAbility(Sunder,victim)
                 end
         end
