@@ -13,7 +13,7 @@ local reg = false
 local monitor     = client.screenSize.x/1600
 local F15         = drawMgr:CreateFont("F15","Tahoma",15*monitor,550*monitor)
 local F14         = drawMgr:CreateFont("F14","Tahoma",14*monitor,550*monitor) 
-local statusText  = drawMgr:CreateText(10*monitor,600*monitor,-1,"(" .. string.char(toggleKey) .. ") Auto Sunder: On",F14) statusText.visible = false
+local statusText  = drawMgr:CreateText(10*monitor,560*monitor,-1,"(" .. string.char(toggleKey) .. ") Auto Sunder: On",F14) statusText.visible = false
 local myhp = 0.2 --20%, Change me if you want to sunder at a higher / lower HP
 
 local hotkeyText
