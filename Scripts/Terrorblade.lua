@@ -36,12 +36,12 @@ function Key(msg,code)
 end
 
 function Tick()
-	if not SleepCheck() then return end	Sleep(125)
+	if not SleepCheck() then return end Sleep(125)
 	local me = entityList:GetMyHero()
 	if not (me or activ) then return end
 	if me.alive and not me:IsChanneling() then
 		local Sunder = me:GetAbility(4)
-		if Sunder.level > 0 then
+		if Sunder:CanBeCasted() and Sunder.level > 0 then
 			local victim = targetFind:GetHighestPercentHP(250,true,true)
 			if me.health/me.maxHealth < myhp and victim and victim.alive then
 				me:SafeCastAbility(Sunder,victim)
