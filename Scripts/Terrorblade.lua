@@ -38,7 +38,7 @@ end
 function Tick()
 	if not SleepCheck() then return end Sleep(125)
 	local me = entityList:GetMyHero()
-	if not (me or activ) then return end
+	if not (me and activ) then return end
 	if me.alive and not me:IsChanneling() then
 		local Sunder = me:GetAbility(4)
 		if Sunder:CanBeCasted() and Sunder.level > 0 then
