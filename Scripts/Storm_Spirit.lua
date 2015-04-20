@@ -36,14 +36,20 @@ function Main(tick)
 		if not Animations.CanMove(me) and victim and GetDistance2D(me,victim) <= 2000 then
 			if tick > attack and SleepCheck("casting") then
 				if victim.hero and not Animations.isAttacking(me) then
+                    local W = me:GetAbility(2)
 					local R = me:GetAbility(4)
 					local Overload = me:DoesHaveModifier("modifier_storm_spirit_overload")
 					local Sheep = me:FindItem("item_sheepstick")
 					local Orchid = me:FindItem("item_orchid")
 					local Shivas = me:FindItem("item_shivas_guard")
 					local distance = GetDistance2D(victim,me)
-					local Stuff = victim:IsSilenced() or victim:IsHexed() or victim:IsStunned() or victim:IsLinkensProtected()
+                    local pull = victim:IsHexed() or victim:IsStunned()
+                    local silenced = victim:IsSilenced()
+                    local hex = victim:IsHexed()
+                    local stunned = victim:IsStunned()
+                    local linkens = victim:IsLinkensProtected()
 					local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
+                    
 					if R and R:CanBeCasted() and me:CanCast() and distance > attackRange and not balling then
 						local CP = R:FindCastPoint()
 						local delay = CP*1000+client.latency+me:GetTurnTime(victim)*1000
@@ -54,15 +60,15 @@ function Main(tick)
 							Sleep(CP*1000+me:GetTurnTime(victim)*1000, "casting")
 						end
 					end
-					if Orchid and Orchid:CanBeCasted() and not Stuff then
-						me:CastAbility(Orchid, victim)
-						Sleep(me:GetTurnTime(victim)*1000, "casting")
-					end
-					if Sheep and Sheep:CanBeCasted() and not Stuff and Orchid and Orchid.cd > 4 then
+                    if Sheep and Sheep:CanBeCasted() and not pull and not W:CanBeCasted() and not linkens then
 						me:CastAbility(Sheep, victim)
 						Sleep(me:GetTurnTime(victim)*1000, "casting")
 					end
-					if Shivas and Shivas:CanBeCasted() then
+					if Orchid and Orchid:CanBeCasted() and not silenced and not linkens then
+						me:CastAbility(Orchid, victim)
+						Sleep(me:GetTurnTime(victim)*1000, "casting")
+					end
+					if Shivas and Shivas:CanBeCasted() and distance < attackRange then
 						me:CastAbility(Shivas)
 						Sleep(me:GetTurnTime(victim)*1000, "casting")
 					end				
@@ -79,16 +85,16 @@ function Main(tick)
 				local Orchid = me:FindItem("item_orchid")
 				local Overload = me:DoesHaveModifier("modifier_storm_spirit_overload")
 				local Dagon = me:FindDagon()
-				local distance = GetDistance2D(victim,me)	
+				local distance = GetDistance2D(victim,me)
+                local pull = victim:IsHexed() or victim:IsStunned()              
                 local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
-                local Stuff = victim:IsSilenced() or victim:IsHexed() or victim:IsStunned() or victim:IsLinkensProtected()
-					
+                					
 				if Dagon and Dagon:CanBeCasted() and me:CanCast() then
 					me:CastAbility(Dagon, victim)
 					Sleep(me:GetTurnTime(victim)*1000, "casting")
 				end
 				if not Overload then
-                    if W and W:CanBeCasted() and me:CanCast() and not Stuff and distance <= W.castRange and not Sheep:CanBeCasted() and not Orchid:CanBeCasted() then
+                    if W and W:CanBeCasted() and me:CanCast() and distance <= W.castRange+100 and not pull then
 							me:CastAbility(W,victim)
 							Sleep(W:FindCastPoint()*1000+me:GetTurnTime(victim)*1000,"casting")
 						end
@@ -115,8 +121,6 @@ function Main(tick)
 				else
 					me:Follow(victim)
 				end
-			else
-				me:Move(client.mousePosition)
 			end
 			move = tick + 100
 		end
