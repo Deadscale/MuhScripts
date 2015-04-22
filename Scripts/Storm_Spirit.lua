@@ -42,6 +42,7 @@ function Main(tick)
 					local Sheep = me:FindItem("item_sheepstick")
 					local Orchid = me:FindItem("item_orchid")
 					local Shivas = me:FindItem("item_shivas_guard")
+                    local SoulRing = me:FindItem("item_soul_ring")
 					local distance = GetDistance2D(victim,me)
                     local pull = victim:IsHexed() or victim:IsStunned()
                     local silenced = victim:IsSilenced()
@@ -60,11 +61,15 @@ function Main(tick)
 							Sleep(CP*1000+me:GetTurnTime(victim)*1000, "casting")
 						end
 					end
+                    if SoulRing and SoulRing:CanBeCasted() and distance < attackRange then
+                        me:CastAbility(SoulRing)
+                        Sleep(me:GetTurnTime(victim)*1000, "casting")
+                    end
                     if Sheep and Sheep:CanBeCasted() and not pull and not W:CanBeCasted() and not linkens then
 						me:CastAbility(Sheep, victim)
 						Sleep(me:GetTurnTime(victim)*1000, "casting")
 					end
-					if Orchid and Orchid:CanBeCasted() and not silenced and not linkens then
+					if Orchid and Orchid:CanBeCasted() and not silenced then
 						me:CastAbility(Orchid, victim)
 						Sleep(me:GetTurnTime(victim)*1000, "casting")
 					end
@@ -86,7 +91,8 @@ function Main(tick)
 				local Overload = me:DoesHaveModifier("modifier_storm_spirit_overload")
 				local Dagon = me:FindDagon()
 				local distance = GetDistance2D(victim,me)
-                local pull = victim:IsHexed() or victim:IsStunned()              
+                local pull = victim:IsHexed() or victim:IsStunned()   
+                local linkens = victim:IsLinkensProtected()
                 local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
                 					
 				if Dagon and Dagon:CanBeCasted() and me:CanCast() then
@@ -94,7 +100,7 @@ function Main(tick)
 					Sleep(me:GetTurnTime(victim)*1000, "casting")
 				end
 				if not Overload then
-                    if W and W:CanBeCasted() and me:CanCast() and distance <= W.castRange+100 and not pull then
+                    if W and W:CanBeCasted() and me:CanCast() and distance <= W.castRange+100 and not pull and not linkens then
 							me:CastAbility(W,victim)
 							Sleep(W:FindCastPoint()*1000+me:GetTurnTime(victim)*1000,"casting")
 						end
