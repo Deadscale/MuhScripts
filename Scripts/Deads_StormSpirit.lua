@@ -58,7 +58,7 @@ function Tick(tick)
     end
     
     if (IsKeyDown(ChaseKey) or IsKeyDown(StayKey) or IsKeyDown(BallKey))and not client.chat then
-        if Animations.CanMove(me) or not start or (victim and GetDistance2D(victim,me) > attackRange+250) then
+        if Animations.CanMove(me) or not start or (victim and GetDistance2D(victim,me) > attackRange+450) then
             start = true
             local MouseOver = targetFind:GetLastMouseOver(1500)
             if MouseOver and (not victim or GetDistance2D(me,victim) > attackRange or not victim.alive) and SleepCheck("victim") then            
@@ -69,82 +69,83 @@ function Tick(tick)
             end
         end
         if not Animations.CanMove(me) and victim and GetDistance2D(me,victim) <= 1500 then
-            if tick > attack and SleepCheck("casting") then
-                if victim.hero and not Animations.isAttacking(me) then
-                    local W = me:GetAbility(2)
-                    local R = me:GetAbility(4)
-                    local Sheep = me:FindItem("item_sheepstick")
-                    local Orchid = me:FindItem("item_orchid")
-                    local Shivas = me:FindItem("item_shivas_guard")
-                    local SoulRing = me:FindItem("item_soul_ring")
-                    local distance = GetDistance2D(victim,me)
-                    local pull = victim:IsHexed() or victim:IsStunned()
-                    local silenced = victim:IsSilenced()
-                    local linkens = victim:IsLinkensProtected()
-                    local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
+            if tick > attack and SleepCheck("casting") and victim.hero then
+                local Q = me:GetAbility(1)
+                local W = me:GetAbility(2)
+                local R = me:GetAbility(4)
+                local Sheep = me:FindItem("item_sheepstick")
+                local Orchid = me:FindItem("item_orchid")
+                local Shivas = me:FindItem("item_shivas_guard")
+                local SoulRing = me:FindItem("item_soul_ring")                   
+                local silenced = victim:IsSilenced() 
+                local pull = victim:IsHexed() or victim:IsStunned()
+                local linkens = victim:IsLinkensProtected()
+                local distance = GetDistance2D(victim,me)                
+                local Overload = me:DoesHaveModifier("modifier_storm_spirit_overload")                
+                local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
+                
+                if W and W:CanBeCasted() and me:CanCast() and distance <= W.castRange+100 and not pull and not linkens and not Sheep:CanBeCasted() then
+                    me:CastAbility(W,victim)
+                    Sleep(W:FindCastPoint()*1000+me:GetTurnTime(victim)*1000,"casting")
+                end
+
+                if Q and Q:CanBeCasted() and me:CanCast() and distance <= attackRange+200 and not Overload then
+                    me:CastAbility(Q)
+                    Sleep(client.latency, "casting")
+                end
                     
-                    if R and R:CanBeCasted() and me:CanCast() and distance > attackRange+200 and not balling and not R.abilityphase then
-                        local CP = R:FindCastPoint()
-                        local delay = CP*1000+client.latency+me:GetTurnTime(victim)*1000
-                        local speed = R:GetSpecialData("ball_lightning_move_speed", R.level)
-                        local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
-                        if xyz then
-                            me:CastAbility(R,xyz)
-                            Sleep(delay, "casting")
-                        end
+                if R and R:CanBeCasted() and me:CanCast() and distance > attackRange+100 and not balling and not R.abilityphase then
+                    local CP = R:FindCastPoint()
+                    local delay = CP*1000+client.latency+me:GetTurnTime(victim)*1000
+                    local speed = R:GetSpecialData("ball_lightning_move_speed", R.level)
+                    local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
+                    if xyz then
+                        me:CastAbility(R,xyz)
+                        Sleep(delay, "casting")
                     end
-                    if W and W:CanBeCasted() and me:CanCast() and distance <= W.castRange and not pull and not linkens then
-                        me:CastAbility(W,victim)
-                        Sleep(W:FindCastPoint()*1000+me:GetTurnTime(victim)*1000,"casting")
-                    end
-                    if SoulRing and SoulRing:CanBeCasted() and distance < attackRange+100 then
-                        me:CastAbility(SoulRing)
-                        Sleep(client.latency, "casting")
-                    end
-                    if Sheep and Sheep:CanBeCasted() and not pull and not W:CanBeCasted() and not linkens then
-                        me:CastAbility(Sheep, victim)
-                        Sleep(me:GetTurnTime(victim)*1000, "casting")
-                    end
-                    if Orchid and Orchid:CanBeCasted() and not silenced then
-                        me:CastAbility(Orchid, victim)
-                        Sleep(me:GetTurnTime(victim)*1000, "casting")
-                    end
-                    if Shivas and Shivas:CanBeCasted() and distance < attackRange+100 then
-                        me:CastAbility(Shivas)
-                        Sleep(client.latency, "casting")
-                    end
+                end
+                
+                if SoulRing and SoulRing:CanBeCasted() and distance < attackRange+200 then
+                    me:CastAbility(SoulRing)
+                    Sleep(client.latency, "casting")
+                end
+                if Sheep and Sheep:CanBeCasted() and not pull and not linkens then
+                    me:CastAbility(Sheep, victim)
+                    Sleep(me:GetTurnTime(victim)*1000, "casting")
+                end
+                if Orchid and Orchid:CanBeCasted() and not silenced then
+                    me:CastAbility(Orchid, victim)
+                    Sleep(me:GetTurnTime(victim)*1000, "casting")
+                end
+                if Shivas and Shivas:CanBeCasted() and distance < attackRange+200 then
+                    me:CastAbility(Shivas)
+                    Sleep(client.latency, "casting")
                 end
                 me:Attack(victim)
                 attack = tick + 100
             end
         elseif tick > move and SleepCheck("casting") then
             if victim and victim.hero and not Animations.isAttacking(me) then
-                local Q = me:GetAbility(1)
-                local R = me:GetAbility(4)
-                local distance = GetDistance2D(victim,me)
-                local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
+                local R = me:GetAbility(4)    
+                local Overload = me:DoesHaveModifier("modifier_storm_spirit_overload")                
+                local distance = GetDistance2D(victim,me)                
                 
-                if not Overload then
-                    if Q and Q:CanBeCasted() and me:CanCast() and distance < attackRange+200 then
-                        me:CastAbility(Q)
-                        Sleep(client.latency,"casting")
+                if IsKeyDown(ChaseKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload then
+                    local CP = R:FindCastPoint()
+                    local delay = CP*1000+client.latency+me:GetTurnTime(victim)*1000
+                    local speed = R:GetSpecialData("ball_lightning_move_speed", R.level)
+                    local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
+                    if xyz then
+                        me:CastAbility(R,xyz)
+                        Sleep(delay, "casting")
                     end
-                    if IsKeyDown(ChaseKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 then
-                        local CP = R:FindCastPoint()
-                        local delay = CP*1000+client.latency+me:GetTurnTime(victim)*1000
-                        local speed = R:GetSpecialData("ball_lightning_move_speed", R.level)
-                        local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
-                        if xyz then
-                            me:CastAbility(R,xyz)
-                            Sleep(delay, "casting")
-                        end
-                    end
-                    if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 then
+                end
+                
+                if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload then
                     local mouse = client.mousePosition
                     local xyz = (mouse - me.position) * 400 / GetDistance2D(mouse,me) + me.position
-                        me:CastAbility(R,xyz)
-                        Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
-                    end
+                    me:CastAbility(R,xyz)
+                    Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
                 end
             end
             if victim then
