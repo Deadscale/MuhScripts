@@ -84,7 +84,7 @@ function Tick(tick)
                 local Overload = me:DoesHaveModifier("modifier_storm_spirit_overload")                
                 local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
                 
-                if W and W:CanBeCasted() and me:CanCast() and distance <= W.castRange+100 and not pull and not linkens and not Sheep:CanBeCasted() then
+                if W and W:CanBeCasted() and me:CanCast() and distance <= W.castRange+100 and not pull and not linkens and not (Sheep and Sheep:CanBeCasted()) then
                     me:CastAbility(W,victim)
                     Sleep(W:FindCastPoint()*1000+me:GetTurnTime(victim)*1000,"casting")
                 end
