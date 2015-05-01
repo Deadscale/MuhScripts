@@ -161,7 +161,7 @@ function Tick(tick)
                             Sleep(Q:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
                         end                        
                     end
-                    if Q and not Q:CanBeCasted() and treads and treads.bootsState ~= 0 and SleepCheck("change2") and not W:CanBeCasted() then
+                    if Q and not Q:CanBeCasted() and treads and treads.bootsState ~= 0 and SleepCheck("change2") and ((not W:CanBeCasted() and active) or (not active)) then
                         me:SetPowerTreadsState(PT_STR)
                         Sleep(200, "change2")
                     end                                 
