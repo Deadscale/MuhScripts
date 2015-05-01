@@ -26,7 +26,7 @@ local active = false
 local monitor = client.screenSize.x/1600
 local F14 = drawMgr:CreateFont("F14","Tahoma",14*monitor,550*monitor) 
 local statusText = drawMgr:CreateText(-20*monitor,80*monitor,-1,"Targeting",F14) statusText.visible = false
-local quillText  = drawMgr:CreateText(10*monitor,560*monitor,-1,"(" .. string.char(toggleKey) .. ") Auto Quill: On",F14) quillText.visible = false
+local quillText  = drawMgr:CreateText(10*monitor,560*monitor,-1,"(" .. string.char(toggleKey) .. ") Auto Quill: Off",F14) quillText.visible = false
 local me = entityList:GetMyHero()
 
 -- Load --
@@ -126,6 +126,7 @@ function Tick(tick)
         if victim and GetDistance2D(me,victim) <= 1000 and victim.hero then
             if tick > attack and SleepCheck("casting") then
                 local Q = me:GetAbility(1)
+                local W = me:GetAbility(2)
                 local distance = GetDistance2D(victim,me)
                 local disabled = victim:IsHexed() or victim:IsStunned()                
                 local linkens = victim:IsLinkensProtected()
@@ -160,7 +161,7 @@ function Tick(tick)
                             Sleep(Q:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
                         end                        
                     end
-                    if Q and not Q:CanBeCasted() and treads and treads.bootsState ~= 0 and SleepCheck("change2")then
+                    if Q and not Q:CanBeCasted() and treads and treads.bootsState ~= 0 and SleepCheck("change2") and not W:CanBeCasted() then
                         me:SetPowerTreadsState(PT_STR)
                         Sleep(200, "change2")
                     end                                 
