@@ -7,11 +7,17 @@ require("libs.Skillshot")
 -- Config --
 local config = ScriptConfig.new()
 config:SetParameter("Chase", "S", config.TYPE_HOTKEY)
-config:SetParameter("Quill", "D", config.TYPE_HOTKEY)
+config:SetParameter("QuillToggle", "F", config.TYPE_HOTKEY)
+config:SetParameter("QuillHold", "D", config.TYPE_HOTKEY)
+config:SetParameter("QuillSpam", "R", config.TYPE_HOTKEY)
+config:SetParameter("QuillFarm", "E", config.TYPE_HOTKEY)
 config:Load()
 
 local ChaseKey = config.Chase
-local toggleKey = config.Quill
+local toggleKey = config.QuillToggle
+local QuillKey = config.QuillHold
+local SpamKey = config.QuillSpam
+local FarmKey = config.QuillFarm
 
 -- Globals --
 local reg = false
@@ -52,8 +58,9 @@ end
 -- Key --
 function Key(msg,code)
 	if not PlayingGame() or client.chat then return end	
-	if IsKeyDown(toggleKey) then
+	if IsKeyDown(toggleKey) and SleepCheck("toggle") then
 		active = not active
+        Sleep(200, "toggle")
 		if active then
 			quillText.text = "(" .. string.char(toggleKey) .. ") Auto Quill: On"
 		else
@@ -83,10 +90,75 @@ function Tick(tick)
         statusText.visible = false
     end
     
-    if active and me.alive then
+    if IsKeyDown(FarmKey) and SleepCheck("change") and not client.chat then
+        local treads = me:FindItem("item_power_treads")
+        local W = me:GetAbility(2)
+        local creeps = entityList:FindEntities({classId=CDOTA_BaseNPC_Creep_Lane,team=TEAM_ENEMY,alive=true,visible=true,team = me:GetEnemyTeam()})
+        local damage = {20,40,60,80}
+		
+        for i,v in ipairs(creeps) do
+            if W and W:CanBeCasted() and me:CanCast() and (v.health < v:DamageTaken(damage[W.level],DAMAGE_PHYS,me) and v.health > 0 and GetDistance2D(v,me) < quillRange) then
+                if not treads then
+                    me:CastAbility(W)
+                end
+                if treads then
+                    if treads.bootsState ~= 1 then
+                        me:SetPowerTreadsState(PT_INT)
+                        Sleep(150, "change")
+                    end
+                    if treads.bootsState == 1 then
+                        me:CastAbility(W)
+                    end
+                end
+            end
+        end
+        if W and not W:CanBeCasted() and treads and treads.bootsState ~= 0 then
+            me:SetPowerTreadsState(PT_STR)
+            Sleep(150, "change")
+        end
+    end  
+    
+    if IsKeyDown(SpamKey) and SleepCheck("change") and not client.chat then
+        local treads = me:FindItem("item_power_treads")
+        local W = me:GetAbility(2)
+        local Mana = me.mana
+        local Mango = me:FindItem("item_enchanted_mango")
+        
+        if Mango and Mango:CanBeCasted() and Mana < W.manacost then
+            me:CastAbility(Mango, me)
+        end
+        
+        if W and W:CanBeCasted() and me:CanCast() then
+            if not treads then
+                me:CastAbility(W)
+            end
+            if treads then
+                if treads.bootsState ~= 1 then
+                    me:SetPowerTreadsState(PT_INT)
+                    Sleep(150, "change")
+                end
+                if treads.bootsState == 1 then
+                    me:CastAbility(W)
+                end
+            end
+        end
+        
+        if W and not W:CanBeCasted() and treads and treads.bootsState ~= 0 then
+            me:SetPowerTreadsState(PT_STR)
+            Sleep(150, "change")
+        end
+    end           
+    
+    if (active or IsKeyDown(QuillKey)) and me.alive then
         local target = targetFind:GetHighestPercentHP(quillRange,true,false)
         local W = me:GetAbility(2)
         local treads = me:FindItem("item_power_treads")
+        local Mana = me.mana
+        local Mango = me:FindItem("item_enchanted_mango")
+        
+        if Mango and Mango:CanBeCasted() and Mana < W.manacost then
+            me:CastAbility(Mango, me)
+        end
         
         if target and SleepCheck("change") then
             local distance2t = GetDistance2D(target,me)
@@ -95,7 +167,7 @@ function Tick(tick)
                 if treads then
                     if treads.bootsState ~= 1 then
                         me:SetPowerTreadsState(PT_INT)
-                        Sleep(200, "change")
+                        Sleep(150, "change")
                     end
                     if treads.bootsState == 1 then
                         me:CastAbility(W)
@@ -105,9 +177,10 @@ function Tick(tick)
                     me:CastAbility(W)
                 end               
             end
+            
             if W and not W:CanBeCasted() and treads and treads.bootsState ~= 0 and not IsKeyDown(ChaseKey) then
                 me:SetPowerTreadsState(PT_STR)
-                Sleep(200, "change")
+                Sleep(150, "change")
             end
         end
     end
@@ -127,11 +200,13 @@ function Tick(tick)
             if tick > attack and SleepCheck("casting") then
                 local Q = me:GetAbility(1)
                 local W = me:GetAbility(2)
+                local Mana = me.mana
                 local distance = GetDistance2D(victim,me)
                 local disabled = victim:IsHexed() or victim:IsStunned()                
                 local linkens = victim:IsLinkensProtected()
                 local Bash = me:FindItem("item_abyssal_blade")
                 local Shivas = me:FindItem("item_shivas_guard")
+                local Mango = me:FindItem("item_enchanted_mango")                
             
                 if Bash and Bash:CanBeCasted() and distance <= attackRange+150 and not disabled and not linkens then
                     me:CastAbility(Bash, victim)
@@ -139,6 +214,10 @@ function Tick(tick)
                 
                 if Shivas and Shivas:CanBeCasted() and distance <= Q.castRange then
                     me:CastAbility(Shivas)
+                end
+                
+                if Mango and Mango:CanBeCasted() and Mana < Q.manacost then
+                    me:CastAbility(Mango, me)
                 end
                 
                 if not Animations.isAttacking(me) then
@@ -149,7 +228,7 @@ function Tick(tick)
                         if treads then
                             if treads.bootsState ~= 1 and SleepCheck("change2") then
                                 me:SetPowerTreadsState(PT_INT)
-                                Sleep(200, "change2")
+                                Sleep(150, "change2")
                             end
                             if treads.bootsState == 1 then
                                 me:CastAbility(Q, victim)
@@ -161,9 +240,9 @@ function Tick(tick)
                             Sleep(Q:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
                         end                        
                     end
-                    if Q and not Q:CanBeCasted() and treads and treads.bootsState ~= 0 and SleepCheck("change2") and ((not W:CanBeCasted() and active) or (not active)) then
+                    if Q and not Q:CanBeCasted() and treads and treads.bootsState ~= 0 and SleepCheck("change2") and ((not W:CanBeCasted() and (active or IsKeyDown(QuillKey) or IsKeyDown(SpamKey) or IsKeyDown(FarmKey))) or (not active)) then
                         me:SetPowerTreadsState(PT_STR)
-                        Sleep(200, "change2")
+                        Sleep(150, "change2")
                     end                                 
                 end
                 me:Attack(victim)
