@@ -149,7 +149,7 @@ function Tick(tick)
         end
     end           
     
-    if (active or IsKeyDown(QuillKey)) and me.alive then
+    if (active or IsKeyDown(QuillKey)) and me.alive and not client.chat then
         local target = targetFind:GetHighestPercentHP(quillRange,true,false)
         local W = me:GetAbility(2)
         local treads = me:FindItem("item_power_treads")
