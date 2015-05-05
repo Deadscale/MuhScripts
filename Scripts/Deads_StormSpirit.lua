@@ -144,8 +144,10 @@ function Tick(tick)
                 if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload then
                     local mouse = client.mousePosition
                     local xyz = (mouse - me.position) * 400 / GetDistance2D(mouse,me) + me.position
-                    me:CastAbility(R,xyz)
-                    Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
+                    if GetDistance2D(me,victim) ~= 0 then
+                        me:CastAbility(R,xyz)
+                        Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
+                    end
                 end
             end
             if victim then
