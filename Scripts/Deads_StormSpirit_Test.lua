@@ -12,7 +12,7 @@ config:SetParameter("NoBall", "F", config.TYPE_HOTKEY)
 config:SetParameter("Distance", "E", config.TYPE_HOTKEY)
 config:SetParameter("Toggle", "X", config.TYPE_HOTKEY)
 config:SetParameter("StayDistance", 400)
-config:SetParameter("JumpDistance", -650)
+config:SetParameter("JumpDistance", 650)
 config:Load()
 
 local ChaseKey = config.Chase
@@ -202,7 +202,7 @@ function Tick(tick)
                     end
                 end
                 if IsKeyDown(DistanceKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload then
-                    local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange+JumpDistance)) / GetDistance2D(me,victim) + me.position
+                    local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange-JumpDistance)) / GetDistance2D(me,victim) + me.position
                     if GetDistance2D(me,victim) ~= 0 then
                         me:CastAbility(R,position)
                         Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
