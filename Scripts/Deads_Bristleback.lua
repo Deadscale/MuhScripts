@@ -33,11 +33,12 @@ local monitor = client.screenSize.x/1600
 local F14 = drawMgr:CreateFont("F14","Tahoma",14*monitor,550*monitor) 
 local statusText = drawMgr:CreateText(-20*monitor,80*monitor,-1,"Targeting",F14) statusText.visible = false
 local quillText  = drawMgr:CreateText(10*monitor,560*monitor,-1,"(" .. string.char(toggleKey) .. ") Auto Quill: Off",F14) quillText.visible = false
-local me = entityList:GetMyHero()
+
 
 -- Load --
 function Load()
     if PlayingGame() then
+        local me = entityList:GetMyHero()
         if me.classId ~= CDOTA_Unit_Hero_Bristleback then 
             script:Disable() 
         else
@@ -79,7 +80,7 @@ end
 
 -- Main --
 function Tick(tick)
-    local attackRange = me.attackRange
+    local me = entityList:GetMyHero()
     local quillRange = 625
     
     if victim and victim.visible then
@@ -186,6 +187,7 @@ function Tick(tick)
     end
             
     if IsKeyDown(ChaseKey) and not client.chat then
+        local attackRange = me.attackRange
         if Animations.CanMove(me) or not start or (victim and GetDistance2D(victim,me) > attackRange+1000) then
             start = true
             local MouseOver = targetFind:GetLastMouseOver(1000)
