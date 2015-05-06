@@ -76,7 +76,7 @@ end
 -- Main --
 function Tick(tick)
     local me = entityList:GetMyHero()
-    local attackRange = me.attackRange
+    local attackRange = 480
     
     if victim and victim.visible then
         if not statusText.visible then
