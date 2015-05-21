@@ -174,7 +174,7 @@ function Tick(tick)
                     end
                 end
                 me:Attack(victim)
-                attack = tick + 100
+                attack = Animations.maxCount/1.5
             end
         elseif tick > move and SleepCheck("casting") then
             if victim and victim.hero and not Animations.isAttacking(me) then
@@ -223,7 +223,7 @@ function Tick(tick)
             else
                 me:Move(client.mousePosition)
             end
-            move = tick + 100
+            move = Animations.maxCount/1.5
             start = false
         end
     elseif victim then
