@@ -109,7 +109,6 @@ function Tick(tick)
                     megaplayer:HoldPosition()
                     Sleep(SleepTime, "stop")
                 else
-                    print(damage)
                     return true
                 end
             end
