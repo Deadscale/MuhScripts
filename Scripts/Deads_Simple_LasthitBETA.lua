@@ -24,16 +24,11 @@ local toggleText  = drawMgr:CreateText(10*monitor,580*monitor,-1,"(" .. string.c
 -- Load --
 function Load()
     if PlayingGame() then
-        local me = entityList:GetMyHero()
-        if not me then
-            script:Disable() 
-        else
-            reg = true
-            toggleText.visible = true
-            script:RegisterEvent(EVENT_KEY,Key)
-            script:RegisterEvent(EVENT_TICK,Tick)
-            script:UnregisterEvent(Load)
-        end
+        reg = true
+        toggleText.visible = true
+        script:RegisterEvent(EVENT_KEY,Key)
+        script:RegisterEvent(EVENT_TICK,Tick)
+        script:UnregisterEvent(Load)
     end
 end
 
@@ -62,6 +57,7 @@ end
 -- Main --
 function Tick(tick)
     local me = entityList:GetMyHero()
+    if not me then return end
     local aRange = me.attackRange
     local bonus = 0
     
@@ -121,7 +117,7 @@ function GameClose()
     collectgarbage("collect")
     if reg then
         reg = false
-        active = false
+        active = true
         toggleText.visible = false
         script:UnregisterEvent(Tick)
         script:UnregisterEvent(Key)
