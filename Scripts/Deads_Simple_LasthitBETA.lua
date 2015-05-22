@@ -6,10 +6,12 @@ require("libs.Animations")
 local config = ScriptConfig.new()
 config:SetParameter("Stop", "S", config.TYPE_HOTKEY)
 config:SetParameter("Toggle", "X", config.TYPE_HOTKEY)
+config:SetParameter("SleepTime", 100)
 config:Load()
 
 local StopKey = config.Stop
 local toggleKey = config.Toggle
+local SleepTime = config.SleepTime
 
 -- Globals --
 local reg = false
@@ -100,7 +102,7 @@ function Tick(tick)
             if target.creep and target.health > 0 and target.visible and GetDistance2D(me,target) <= attackRange+50 then 
                 if Animations.isAttacking(me) and (target.health > (target:DamageTaken(damage,DAMAGE_PHYS,me))) then
                     megaplayer:HoldPosition()
-                    Sleep(100, "stop")
+                    Sleep(SleepTime, "stop")
                 else
                     return true
                 end
