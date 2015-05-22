@@ -85,25 +85,31 @@ function Tick(tick)
     local attackRange = aRange + bonus
     
     if (active and not IsKeyDown(StopKey)) and not client.chat and SleepCheck("stop") then
-        local damage = (me.dmgMin + me.dmgBonus)
+        local damage = me.dmgMin + me.dmgBonus
         local megaplayer = entityList:GetMyPlayer()
         local qblade = me:FindItem("item_quelling_blade")
         
         if qblade then
-            if aRange > 195 then
-                damage = damage*1.15
+           if attackRange > 195 then
+                damage = me.dmgMin*1.15 + me.dmgBonus
             else
-                damage = damage*1.40
+                damage = me.dmgMin*1.40 + me.dmgBonus
             end
         end
-        
         if megaplayer.orderId == Player.ORDER_ATTACKENTITY then
             target = megaplayer.target
+            if target.classId == CDOTA_BaseNPC_Creep_Siege then
+                damage = damage*0.5
+            end
+            if target.team == me.team and qblade then
+                damage = me.dmgMin + me.dmgBonus
+            end            
             if target.creep and target.health > 0 and target.visible and GetDistance2D(me,target) <= attackRange+50 then 
                 if Animations.isAttacking(me) and (target.health > (target:DamageTaken(damage,DAMAGE_PHYS,me))) then
                     megaplayer:HoldPosition()
                     Sleep(SleepTime, "stop")
                 else
+                    print(damage)
                     return true
                 end
             end
