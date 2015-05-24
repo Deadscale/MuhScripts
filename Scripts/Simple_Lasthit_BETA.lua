@@ -1,24 +1,30 @@
 require("libs.ScriptConfig")
 require("libs.Utils")
 require("libs.Animations")
+require("libs.HeroInfo")
 
 -- Config --
 local config = ScriptConfig.new()
 config:SetParameter("Stop", "S", config.TYPE_HOTKEY)
 config:SetParameter("Toggle", "X", config.TYPE_HOTKEY)
 config:SetParameter("NoSpam", true)
+config:SetParameter("FreeAttack", true)
 config:Load()
 
 local StopKey = config.Stop
 local toggleKey = config.Toggle
 local NoSpam = config.NoSpam
+local FreeAttack = config.FreeAttack
 
 -- Globals --
 local reg = false
 local active = true
+local holder = false
+local Jinada = nil
+local Gem = nil
 local monitor = client.screenSize.x/1600
 local F14 = drawMgr:CreateFont("F14","Tahoma",14*monitor,550*monitor) 
-local toggleText  = drawMgr:CreateText(10*monitor,630*monitor,-1,"(" .. string.char(toggleKey) .. ") Last Hit: On",F14) toggleText.visible = false
+local toggleText  = drawMgr:CreateText(10*monitor,620*monitor,-1,"(" .. string.char(toggleKey) .. ") Last Hit: On",F14) toggleText.visible = false
 
 
 -- Load --
@@ -27,7 +33,7 @@ function Load()
         reg = true
         toggleText.visible = true
         script:RegisterEvent(EVENT_KEY,Key)
-        script:RegisterEvent(EVENT_TICK,Tick)
+        script:RegisterEvent(EVENT_FRAME,Tick)
         script:UnregisterEvent(Load)
     end
 end
@@ -58,8 +64,12 @@ end
 function Tick(tick)
     local me = entityList:GetMyHero()
     if not me then return end
+    local name = entityList:GetMyHero().name
+	local apointcalc = ((heroInfo[name].attackPoint*100)/(1+me.attackSpeed))*1000
+    local apoint = (apointcalc - (client.latency/2))
     local aRange = me.attackRange
     local bonus = 0
+    local buffer = 0
     
     if me.classId == CDOTA_Unit_Hero_Sniper then
         local TakeAim = me:GetAbility(3)
@@ -93,8 +103,9 @@ function Tick(tick)
             end
         end
             
-        if megaplayer.orderId == Player.ORDER_ATTACKENTITY and (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege) and megaplayer.target.alive == true and megaplayer.target.visible == true and SleepCheck("stop") then
-        target = megaplayer.target     
+        if megaplayer.orderId == Player.ORDER_ATTACKENTITY and (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege) and (megaplayer.target.alive == true and megaplayer.target.visible == true and megaplayer.target ~= nil) then
+        local target = megaplayer.target       
+        
             if me.classId == CDOTA_Unit_Hero_AntiMage then
                 local Manabreak = me:GetAbility(1)
                 local Manaburn = {28,40,52,64}
@@ -169,25 +180,49 @@ function Tick(tick)
                 damage = me.dmgMin + me.dmgBonus
             end
             
-            if NoSpam == true then                
-                if Animations.isAttacking(me) and (target.health > (target:DamageTaken(damage,DAMAGE_PHYS,me))) then
-                    megaplayer:HoldPosition()
-                    print(damage)
+            if damage < 100 then
+                buffer = 1.1-damage*0.01
+            end
+            
+            if NoSpam == true then
+                if FreeAttack == false then                    
+                    if Animations.isAttacking(me) and (target.health > (target:DamageTaken(damage,DAMAGE_PHYS,me))) and SleepCheck("stop") then
+                        Sleep(apoint*0.80,"stop")
+                        megaplayer:HoldPosition()                        
+                        megaplayer:Attack(target)
+                        holder = true
+                    end
                 end
-                me:Attack(target)
-                Sleep(25, "stop")
-            else
-                target = nil
+                if FreeAttack == true then                  
+                    if Animations.isAttacking(me) and (target.health > (target:DamageTaken(damage,DAMAGE_PHYS,me))) and (target.health < (target:DamageTaken(damage,DAMAGE_PHYS,me)*(3+buffer)) and (not (me.classId == CDOTA_Unit_Hero_BountyHunter and Jinada and Jinada.cd == 0) or (me.classId == CDOTA_Unit_Hero_Weaver and Gem and Gem.cd == 0))) and SleepCheck("stop") then
+                        Sleep(apoint*0.80,"stop")
+                        megaplayer:HoldPosition()                        
+                        megaplayer:Attack(target)
+                        holder = true
+                    end
+                end    
             end
             if NoSpam == false then
-                if Animations.isAttacking(me) and (megaplayer.target.health > (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))) then
-                    megaplayer:HoldPosition()
-                    Sleep(25, "stop")
-                else
-                    return
+                if FreeAttack == false then                   
+                    if Animations.isAttacking(me) and (target.health > (target:DamageTaken(damage,DAMAGE_PHYS,me))) and SleepCheck("stop") then
+                        Sleep(apoint*0.80,"stop")
+                        megaplayer:HoldPosition()                       
+                        holder = true
+                    end
+                end
+                if FreeAttack == true then
+                    if Animations.isAttacking(me) and (target.health > (target:DamageTaken(damage,DAMAGE_PHYS,me))) and (target.health < (target:DamageTaken(damage,DAMAGE_PHYS,me)*(3+buffer)) and (not (me.classId == CDOTA_Unit_Hero_BountyHunter and Jinada and Jinada.cd == 0) or (me.classId == CDOTA_Unit_Hero_Weaver and Gem and Gem.cd == 0))) and SleepCheck("stop") then                        
+                        Sleep(apoint*0.80,"stop")
+                        megaplayer:HoldPosition()                        
+                        holder = true
+                    end
                 end
             end
-        end                
+        else
+            if holder then
+                target = nil
+            end
+        end
     end
 end
 
@@ -200,9 +235,9 @@ function GameClose()
         toggleText.visible = false
         script:UnregisterEvent(Tick)
         script:UnregisterEvent(Key)
-        script:RegisterEvent(EVENT_TICK,Load)
+        script:RegisterEvent(EVENT_FRAME,Load)
     end
 end
 
 script:RegisterEvent(EVENT_CLOSE,GameClose)
-script:RegisterEvent(EVENT_TICK,Load)
+script:RegisterEvent(EVENT_FRAME,Load)
