@@ -177,7 +177,7 @@ function Tick(tick)
             if target.classId == CDOTA_BaseNPC_Creep_Siege then
                 damage = damage*0.5
             end
-            if target.team == me.team and qblade then
+            if target.team == me.team and (qblade or bfury) then
                 damage = me.dmgMin + me.dmgBonus
             end
             
