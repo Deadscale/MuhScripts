@@ -94,12 +94,21 @@ function Tick(tick)
         local damage = me.dmgMin + me.dmgBonus
         local megaplayer = entityList:GetMyPlayer()
         local qblade = me:FindItem("item_quelling_blade")
+        local bfury = me:FindItem("item_bfury")
         
-        if qblade then
+        if qblade and (not bfury) then
            if attackRange > 195 then
                 damage = me.dmgMin*1.15 + me.dmgBonus
             else
                 damage = me.dmgMin*1.40 + me.dmgBonus
+            end
+        end
+        
+        if bfury then
+            if attackRange > 195 then
+                damage = me.dmgMin*1.25 + me.dmgBonus
+            else
+                damage = me.dmgMin*1.60 + me.dmgBonus
             end
         end
             
@@ -165,14 +174,6 @@ function Tick(tick)
                     damage = damage*1.8
                 end
             end            
-            if me.classId == CDOTA_Unit_Hero_Kunkka then
-                local Tidebringer = me:GetAbility(2)
-                local Tdamage = {15,30,45,60}
-                
-                if Tidebringer and Tidebringer.level > 0 and Tidebringer.cd == 0 then
-                    damage = damage+(Tdamage[Tidebringer.level])
-                end
-            end        
             if target.classId == CDOTA_BaseNPC_Creep_Siege then
                 damage = damage*0.5
             end
