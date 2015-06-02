@@ -157,20 +157,20 @@ function Tick(tick)
                         end
                     end
                 end           
-                if me.classId == CDOTA_Unit_Hero_Ursa and not megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege and not megaplayer.target.classId == CDOTA_BaseNPC_Tower then
+                if me.classId == CDOTA_Unit_Hero_Ursa and not (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
                     local Furyswipes = me:GetAbility(3)
                     local Furybuff = megaplayer.target:FindModifier("modifier_ursa_fury_swipes_damage_increase")
                     local Furydamage = {15,20,25,30}
                     
-                    if Furyswipes and Furyswipes.level > 0 and megaplayer.target.team ~= me.team then
+                    if Furyswipes.level > 0 and megaplayer.target.team ~= me.team then
                         if Furybuff then
-                            damage = damage + Furydamage[Furyswipes.level]*Furybuff.stacks
+                            damage = damage + Furydamage[Furyswipes.level]*(Furybuff.stacks+1)
                         else
                             damage = damage + Furydamage[Furyswipes.level]
                         end
                     end
                 end
-                if me.classId == CDOTA_Unit_Hero_BountyHunter and not megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege and not megaplayer.target.classId == CDOTA_BaseNPC_Tower then
+                if me.classId == CDOTA_Unit_Hero_BountyHunter and not (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
                     Jinada = me:GetAbility(2)
                     local Jinadadamage = {1.5,1.75,2,2.25}
                     
