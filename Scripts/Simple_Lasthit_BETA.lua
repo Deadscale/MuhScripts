@@ -198,7 +198,7 @@ function Tick(tick)
                     damage = damage*0.5*(1-megaplayer.target.dmgResist)
                 end
                 if megaplayer.target.classId == CDOTA_BaseNPC_Lane_Creep then
-                    damage = damage*(1-megaplayer.target.dmgResist)
+                    damage = megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me)
                 end
                 
                 if (((megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege) and GetDistance2D(me,megaplayer.target) <= attackRange+100) or (megaplayer.target.classId == CDOTA_BaseNPC_Tower and GetDistance2D(me,megaplayer.target) <= attackRange+300)) and 
