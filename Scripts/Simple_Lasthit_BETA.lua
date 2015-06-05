@@ -110,7 +110,7 @@ function Tick(tick)
             if (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower) and 
             (megaplayer.target.alive == true and megaplayer.target.visible == true and megaplayer.target ~= nil) then
                     
-                if qblade and (not (bfury or Tidebringer)) and not megaplayer.target.classId == CDOTA_BaseNPC_Tower then
+                if qblade and (not (bfury or Tidebringer or megaplayer.target.classId == CDOTA_BaseNPC_Tower)) then
                    if attackRange > 195 then
                         damage = me.dmgMin*1.15 + me.dmgBonus
                     else
@@ -118,7 +118,7 @@ function Tick(tick)
                     end
                 end
                 
-                if bfury and not Tidebringer and not megaplayer.target.classId == CDOTA_BaseNPC_Tower then
+                if bfury and not (Tidebringer or megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
                     if attackRange > 195 then
                         damage = me.dmgMin*1.25 + me.dmgBonus
                     else
