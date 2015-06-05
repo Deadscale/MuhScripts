@@ -64,7 +64,7 @@ function Tick(tick)
     local me = entityList:GetMyHero()
     if not me then return end
     local name = entityList:GetMyHero().name
-	local apoint = ((heroInfo[name].attackPoint*100)/(1+me.attackSpeed))*1000
+    local apoint = ((heroInfo[name].attackPoint*100)/(1+me.attackSpeed))*1000
     local aRange = me.attackRange
     local bonus = 0
     local buffer = 0
@@ -189,21 +189,18 @@ function Tick(tick)
                     damage = me.dmgMin + me.dmgBonus
                 end
                 
-                if me.classId == CDOTA_Unit_Hero_Riki and not megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege and not megaplayer.target.classId == CDOTA_BaseNPC_Tower then
-                    if Animations.isAttacking(me) and (me.rot+180 > target.rot+180-(105/2) and me.rot+180 < target.rot+180+(105/2)) and me:GetAbility(3).level > 0 then
+                if me.classId == CDOTA_Unit_Hero_Riki and not (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
+                    if (me.rot+180 > megaplayer.target.rot+180-(220/2) and me.rot+180 < megaplayer.target.rot+180+(220/2)) and me:GetAbility(3).level > 0 then
                         damage = damage + me.agilityTotal*(me:GetAbility(3).level*0.25+0.25)
                     end
                 end 
                 if megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower then
                     damage = damage*0.5*(1-megaplayer.target.dmgResist)
                 end
-                if megaplayer.target.classId == CDOTA_BaseNPC_Lane_Creep then
-                    damage = megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me)
-                end
                 
                 if (((megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege) and GetDistance2D(me,megaplayer.target) <= attackRange+100) or (megaplayer.target.classId == CDOTA_BaseNPC_Tower and GetDistance2D(me,megaplayer.target) <= attackRange+300)) and 
-                megaplayer.target.health > damage and 
-                (not FreeAttack or (FreeAttack and megaplayer.target.health < damage*2.3) or 
+                (megaplayer.target.health > (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))) and 
+                (not FreeAttack or (FreeAttack and (megaplayer.target.health < (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me)*2.3))) or 
                 (FreeAttack and
                 ( 
                 (me.classId == CDOTA_Unit_Hero_BountyHunter and Jinada and Jinada.cd == 0) or 
@@ -214,7 +211,11 @@ function Tick(tick)
                     megaplayer:HoldPosition()
                     toggleText.text = "(" .. string.char(toggleKey) .. ") Last Hit: On | Target HP = "..megaplayer.target.health.. "| Damage = "..damage
                     --toggleText.text = megaplayer.target.health.." Attack Point Delay =  ".. apoint .. "   Attack Point Delay - 20 =  "..apoint-20
-                    Sleep(apoint,"stop")
+                    if me.classId == CDOTA_Unit_Hero_Bristleback then
+                        Sleep(apoint*0.87,"stop")
+                    else
+                        Sleep(apoint,"stop")
+                    end
                     if NoSpam then 	
                         megaplayer:Attack(megaplayer.target) 
                     end
