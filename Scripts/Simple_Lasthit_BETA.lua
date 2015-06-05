@@ -212,7 +212,7 @@ function Tick(tick)
                     toggleText.text = "(" .. string.char(toggleKey) .. ") Last Hit: On | Target HP = "..megaplayer.target.health.. "| Damage = "..damage
                     --toggleText.text = megaplayer.target.health.." Attack Point Delay =  ".. apoint .. "   Attack Point Delay - 20 =  "..apoint-20
                     if me.classId == CDOTA_Unit_Hero_Bristleback then
-                        Sleep(apoint*0.87,"stop")
+                        Sleep(apoint*0.80,"stop")
                     else
                         Sleep(apoint,"stop")
                     end
