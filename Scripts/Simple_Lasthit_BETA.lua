@@ -200,7 +200,7 @@ function Tick(tick)
                 
                 if (((megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege) and GetDistance2D(me,megaplayer.target) <= attackRange+100) or (megaplayer.target.classId == CDOTA_BaseNPC_Tower and GetDistance2D(me,megaplayer.target) <= attackRange+300)) and 
                 (megaplayer.target.health > (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))) and 
-                (not FreeAttack or (FreeAttack and (megaplayer.target.health < (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me)*2.3))) or 
+                (not FreeAttack or (FreeAttack and (megaplayer.target.health < (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me)*2.5))) or 
                 (FreeAttack and
                 ( 
                 (me.classId == CDOTA_Unit_Hero_BountyHunter and Jinada and Jinada.cd == 0) or 
