@@ -198,6 +198,8 @@ function Tick(tick)
                     damage = damage*0.5*(1-megaplayer.target.dmgResist)
                 end
                 
+                toggleText.text = "(" .. string.char(toggleKey) .. ") Last Hit: On | Target HP = "..megaplayer.target.health.. "| Damage = "..(megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))
+                
                 if (((megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege) and GetDistance2D(me,megaplayer.target) <= attackRange+100) or (megaplayer.target.classId == CDOTA_BaseNPC_Tower and GetDistance2D(me,megaplayer.target) <= attackRange+300)) and 
                 (megaplayer.target.health > (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))) and 
                 (not FreeAttack or (FreeAttack and (megaplayer.target.health < (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me)*2.5))) or 
@@ -207,21 +209,24 @@ function Tick(tick)
                 (me.classId == CDOTA_Unit_Hero_Weaver and Gem and Gem.cd == 0) or
                 (Tidebringer)
                 ))) 
-                and SleepCheck("stop") then
-                    megaplayer:HoldPosition()
-                    toggleText.text = "(" .. string.char(toggleKey) .. ") Last Hit: On | Target HP = "..megaplayer.target.health.. "| Damage = "..damage
-                    --toggleText.text = megaplayer.target.health.." Attack Point Delay =  ".. apoint .. "   Attack Point Delay - 20 =  "..apoint-20
-                    if me.classId == CDOTA_Unit_Hero_Bristleback then
-                        Sleep(apoint*0.80,"stop")
-                    else
-                        Sleep(apoint,"stop")
+                then 
+                    if SleepCheck("stop") then                        
+                        if me.classId == CDOTA_Unit_Hero_Bristleback then
+                            Sleep(apoint*0.80,"stop")
+                        else
+                            Sleep(apoint,"stop")
+                        end
+                        megaplayer:HoldPosition()
+                        if NoSpam then 	
+                            megaplayer:Attack(megaplayer.target) 
+                        end
                     end
-                    if NoSpam then 	
-                        megaplayer:Attack(megaplayer.target) 
-                    end
+                elseif megaplayer.target.health < (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me)) and SleepCheck("StopIt") then
+                    megaplayer:Attack(megaplayer.target)
+                    Sleep(250,"StopIt")
                 end
             end
-		end
+	end
     end
 end
 
