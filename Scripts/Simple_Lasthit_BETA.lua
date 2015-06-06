@@ -195,7 +195,7 @@ function Tick(tick)
                     end
                 end 
                 if megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower then
-                    damage = damage*0.5*(1-megaplayer.target.dmgResist)
+                    damage = damage*0.5
                 end
                 
                 toggleText.text = "(" .. string.char(toggleKey) .. ") Last Hit: On | Target HP = "..megaplayer.target.health.. "| Damage = "..(megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))
