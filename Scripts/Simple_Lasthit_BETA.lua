@@ -106,7 +106,8 @@ function Tick(tick)
         local qblade = me:FindItem("item_quelling_blade")
         local bfury = me:FindItem("item_bfury")
 
-        if megaplayer.orderId == Player.ORDER_ATTACKENTITY and megaplayer.alive == true then 
+        if megaplayer.orderId == Player.ORDER_ATTACKENTITY and megaplayer.alive == true then
+       	    if megaplayer.target == nil then return end	
             if (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower) and 
             (megaplayer.target.alive == true and megaplayer.target.visible == true and megaplayer.target ~= nil) then
                     
