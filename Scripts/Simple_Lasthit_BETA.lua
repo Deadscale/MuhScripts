@@ -107,7 +107,7 @@ function Tick(tick)
         local bfury = me:FindItem("item_bfury")
 
         if megaplayer.orderId == Player.ORDER_ATTACKENTITY and megaplayer.alive == true then
-       	    if megaplayer.target == nil then return end	
+            if megaplayer.target == nil then return end
             if (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower) and 
             (megaplayer.target.alive == true and megaplayer.target.visible == true and megaplayer.target ~= nil) then
                     
@@ -190,16 +190,43 @@ function Tick(tick)
                     damage = me.dmgMin + me.dmgBonus
                 end
                 
+               	if (me.classId == CDOTA_Unit_Hero_SkeletonKing or me.classId == CDOTA_Unit_Hero_ChaosKnight) and me.activity == 426 and not (megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
+			local critabil = me:GetAbility(3)
+			local critmult = {1.5,2,2.5,3}
+			
+			if critabil and critabil.level > 0 and megaplayer.target.team ~= me.team then
+				damage = damage*(critmult[critabil.level])
+			end
+		end
+                
+                if (me.classId == CDOTA_Unit_Hero_Juggernaut or me.classId == CDOTA_Unit_Hero_Brewmaster) and me.activity == 426 and not (megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
+                    local jugcrit = me:GetAbility(3)
+                    
+                    if jugcrit and jugcrit.level > 0 and megaplayer.target.team ~= me.team then
+                        damage = damage*2
+                    end
+                end
+                
+                if me.classId == CDOTA_Unit_Hero_PhantomAssassin and me.activity == 426 and not (megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
+                    local pacrit = me:GetAbility(4)
+                    local pamod = {2.3,3.4,4.5}
+                    
+                    if pacrit and pacrit.level > 0 and megaplayer.target.team ~= me.team then
+                        damage = damage*(pamod[pacrit.level])
+                    end
+                end
+
                 if me.classId == CDOTA_Unit_Hero_Riki and not (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
                     if (me.rot+180 > megaplayer.target.rot+180-(220/2) and me.rot+180 < megaplayer.target.rot+180+(220/2)) and me:GetAbility(3).level > 0 then
                         damage = damage + me.agilityTotal*(me:GetAbility(3).level*0.25+0.25)
                     end
-                end 
+                end
+
                 if megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower then
                     damage = damage*0.5
                 end
                 
-                toggleText.text = "(" .. string.char(toggleKey) .. ") Last Hit: On | Target HP = "..megaplayer.target.health.. "| Damage = "..(megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))
+                toggleText.text = "(" .. string.char(toggleKey) .. ") Last Hit: On | Target HP = "..megaplayer.target.health.. "| Damage = "..(megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))          
                 
                 if (((megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege) and GetDistance2D(me,megaplayer.target) <= attackRange+100) or (megaplayer.target.classId == CDOTA_BaseNPC_Tower and GetDistance2D(me,megaplayer.target) <= attackRange+300)) and 
                 (megaplayer.target.health > (megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))) and 
@@ -227,7 +254,7 @@ function Tick(tick)
                     Sleep(250,"StopIt")
                 end
             end
-	end
+		end
     end
 end
 
