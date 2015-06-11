@@ -8,7 +8,7 @@ require("libs.Skillshot")
 local config = ScriptConfig.new()
 config:SetParameter("Chase", "S", config.TYPE_HOTKEY)
 config:SetParameter("AutoReplicate", "F", config.TYPE_HOTKEY)
-config:SetParameter("ReplicateHPcent", 0.35)
+config:SetParameter("ReplicateHPcent", 35)
 config:Load()
 
 local ChaseKey = config.Chase
@@ -91,7 +91,7 @@ function Tick(tick)
     if active then
         local R = me:GetAbility(6)
         
-        if R.name == "morphling_morph_replicate" and R.cd == 0 and me:CanCast() and me.health/me.maxHealth < myhp then
+        if R.name == "morphling_morph_replicate" and R.cd == 0 and me:CanCast() and me.health/me.maxHealth < myhp/100 then
             me:CastAbility(R)
         end
     end
