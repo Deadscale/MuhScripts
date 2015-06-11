@@ -28,7 +28,7 @@ local active = false
 local monitor = client.screenSize.x/1600
 local F14 = drawMgr:CreateFont("F14","Tahoma",14*monitor,550*monitor) 
 local statusText = drawMgr:CreateText(-20*monitor,80*monitor,-1,"Targeting",F14) statusText.visible = false
-local toggleText  = drawMgr:CreateText(10*monitor,560*monitor,-1,"(" .. string.char(toggleKey) .. ") Toggle: On",F14) toggleText.visible = false
+local toggleText  = drawMgr:CreateText(10*monitor,460*monitor,-1,"(" .. string.char(toggleKey) .. ") AutoReplicate: On",F14) toggleText.visible = false
 local me = entityList:GetMyHero()
 
 -- Load --
@@ -59,9 +59,9 @@ function Key(msg,code)
 		active = not active
         Sleep(200, "toggle")
 		if active then
-			toggleText.text = "(" .. string.char(toggleKey) .. ") Toggle: On"
+			toggleText.text = "(" .. string.char(toggleKey) .. ") AutoReplicate: On"
 		else
-			toggleText.text = "(" .. string.char(toggleKey) .. ") Toggle: Off"
+			toggleText.text = "(" .. string.char(toggleKey) .. ") AutoReplicate: Off"
 		end
 	end
 end
