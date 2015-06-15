@@ -2,7 +2,6 @@ require("libs.ScriptConfig")
 require("libs.Utils")
 require("libs.TargetFind")
 require("libs.Animations")
-require("libs.Skillshot")
 
 -- Config --
 local config = ScriptConfig.new()
@@ -11,6 +10,7 @@ config:SetParameter("Stay", "S", config.TYPE_HOTKEY)
 config:SetParameter("NoBall", "F", config.TYPE_HOTKEY)
 config:SetParameter("Distance", "E", config.TYPE_HOTKEY)
 config:SetParameter("Toggle", "X", config.TYPE_HOTKEY)
+config:SetParameter("Escape", "Z", config.TYPE_HOTKEY)
 config:SetParameter("SKeyDistance", 400)
 config:SetParameter("EKeyDistance", 650)
 config:Load()
@@ -22,6 +22,7 @@ local DistanceKey = config.Distance
 local StayDistance = config.SKeyDistance
 local JumpDistance = config.EKeyDistance
 local toggleKey = config.Toggle
+local EscapeKey = config.Escape
 
 -- Globals --
 local reg = false
@@ -75,9 +76,11 @@ end
 
 -- Main --
 function Tick(tick)
-    local me = entityList:GetMyHero()
+    me = entityList:GetMyHero()
     if not me then return end
     local attackRange = 480
+    local fountain = entityList:FindEntities({classId=CDOTA_Unit_Fountain})
+    local myfountain = nil
     
     if victim and victim.visible then
         if not statusText.visible then
@@ -85,6 +88,36 @@ function Tick(tick)
         end
     else
         statusText.visible = false
+    end
+        
+    for i,v in ipairs(fountain) do
+        if v.team == me.team then
+            myfountain = v
+        end
+        if v.team ~= me.team then
+            enemyfountain = v
+        end
+    end
+        
+    if IsKeyDown(EscapeKey) and SleepCheck("chill") then
+        local R = me:GetAbility(4)
+        local tp = (me:FindItem("item_tpscroll") or  me:FindItem("item_travel_boots") or me:FindItem("item_travel_boots_2"))
+        
+        if not R and tp and me:CanCast() and tp.cd == 0 and tp:CanBeCasted() then
+            me:CastAbility(tp,myfountain.position)
+        end
+        
+        if R and R:CanBeCasted() and me:CanCast() and tp and tp.cd == 0 and me.mana > (R.manacost + tp.manacost) and not me:IsChanneling() then
+            if (me.rot+180 > enemyfountain.rot and me.rot+180 < enemyfountain.rot+180) then            
+                me:CastAbility(R,enemyfountain.position)
+                me:CastAbility(tp,myfountain.position)
+                Sleep(250,"chill")
+            else
+                me:CastAbility(R,myfountain.position)
+                me:CastAbility(tp,myfountain.position)
+                Sleep(250,"chill")
+            end
+        end
     end
     
     if (IsKeyDown(ChaseKey) or IsKeyDown(StayKey) or IsKeyDown(BallKey) or IsKeyDown(DistanceKey))and not client.chat then
@@ -110,12 +143,13 @@ function Tick(tick)
                 local silenced = victim:IsSilenced() 
                 local pull = victim:IsHexed() or victim:IsStunned()
                 local disabled = victim:IsHexed() or victim:IsStunned() or victim:IsSilenced()
-                local linkens = victim:IsLinkensProtected() or victim:IsMagicImmune()
+                local linkens = victim:IsLinkensProtected()
+                local immune =  victim:IsMagicImmune()
                 local distance = GetDistance2D(victim,me)                
                 local Overload = me:DoesHaveModifier("modifier_storm_spirit_overload")                
                 local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
                 
-                if W and W:CanBeCasted() and me:CanCast() and distance <= W.castRange+100 and not pull and not linkens and not (Sheep and Sheep:CanBeCasted()) then
+                if W and W:CanBeCasted() and me:CanCast() and distance <= W.castRange+100 and not pull and not linkens and not (Sheep and Sheep:CanBeCasted()) and not immune then
                     me:CastAbility(W,victim)
                     Sleep(W:FindCastPoint()*1000+me:GetTurnTime(victim)*1000,"casting")
                 end
@@ -124,14 +158,27 @@ function Tick(tick)
                     me:CastAbility(Q)
                 end
                     
-                if R and R:CanBeCasted() and me:CanCast() and distance > attackRange+200 and not balling then
-                    local CP = R:FindCastPoint()
-                    local delay = CP*1000+client.latency+me:GetTurnTime(victim)*1000
-                    local speed = R:GetSpecialData("ball_lightning_move_speed", R.level)
-                    local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
-                    if xyz then
-                        me:CastAbility(R,xyz)
-                        Sleep(delay, "casting")
+                if IsKeyDown(ChaseKey) and R and R:CanBeCasted() and me:CanCast() and distance > attackRange and not balling then
+                    local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange-350)) / GetDistance2D(me,victim) + me.position
+                    if GetDistance2D(me,victim) ~= 0 then
+                        me:CastAbility(R,position)
+                        Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
+                    end
+                end
+                
+                if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance > attackRange+300 then
+                    local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange)) / GetDistance2D(me,victim) + me.position
+                    if GetDistance2D(me,victim) ~= 0 then
+                        me:CastAbility(R,position)
+                        Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
+                    end
+                end
+                
+                if IsKeyDown(DistanceKey) and R and R:CanBeCasted() and me:CanCast() and distance > attackRange+200 then
+                    local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange-JumpDistance)) / GetDistance2D(me,victim) + me.position
+                    if GetDistance2D(me,victim) ~= 0 then
+                        me:CastAbility(R,position)
+                        Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
                     end
                 end
                 
@@ -143,17 +190,17 @@ function Tick(tick)
                     me:CastAbility(Shivas)
                 end
                 
-                if (Sheep and not Orchid) and Sheep:CanBeCasted() and not pull then
+                if (Sheep and not Orchid) and Sheep:CanBeCasted() and not pull and not immune then
                     me:CastAbility(Sheep, victim)
                     Sleep(me:GetTurnTime(victim)*1000, "casting")
                 end
                 
-                if (Orchid and not Sheep) and Orchid:CanBeCasted() and not silenced then
+                if (Orchid and not Sheep) and Orchid:CanBeCasted() and not silenced and not immune then
                     me:CastAbility(Orchid, victim)
                     Sleep(me:GetTurnTime(victim)*1000, "casting")
                 end
                 
-                if (Orchid and Sheep) and active then
+                if (Orchid and Sheep) and active and not immune then
                     if Sheep:CanBeCasted() and not disabled and not linkens then
                         me:CastAbility(Sheep, victim)
                         Sleep(me:GetTurnTime(victim)*1000, "casting")
@@ -164,7 +211,7 @@ function Tick(tick)
                     end
                 end
                 
-                if (Orchid and Sheep) and not active then
+                if (Orchid and Sheep) and not active and not immune then
                     if Sheep:CanBeCasted() and not pull and not linkens then
                         me:CastAbility(Sheep, victim)
                         Sleep(me:GetTurnTime(victim)*1000, "casting")
@@ -174,27 +221,25 @@ function Tick(tick)
                         Sleep(me:GetTurnTime(victim)*1000, "casting")
                     end
                 end
-                me:Attack(victim)
+                if victim:IsAttackImmune() == true then
+                    me:Move(client.mousePosition)
+                else
+                    me:Attack(victim)
+                end
                 attack = Animations.maxCount/1.5
             end
         elseif tick > move and SleepCheck("casting") then
             if victim and victim.hero and not Animations.isAttacking(me) then
                 local R = me:GetAbility(4)    
                 local Overload = me:DoesHaveModifier("modifier_storm_spirit_overload")                
-                local distance = GetDistance2D(victim,me)                
+                local distance = GetDistance2D(victim,me)               
+                local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")                
                 
-                if IsKeyDown(ChaseKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload then
-                    local CP = R:FindCastPoint()
-                    local delay = CP*1000+client.latency+me:GetTurnTime(victim)*1000
-                    local speed = R:GetSpecialData("ball_lightning_move_speed", R.level)
-                    local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
-                    if xyz then
-                        me:CastAbility(R,xyz)
-                        Sleep(delay, "casting")
-                    end
-                end
-                
-                if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload then
+                if IsKeyDown(ChaseKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange and not Overload and not balling then
+                    me:CastAbility(R,me.position)
+                    Sleep(R:FindCastPoint()*1000, "casting")
+                end                
+                if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+300 and not Overload and not balling then
                     local mouse = client.mousePosition
                     local xyz = (mouse - me.position) * StayDistance / GetDistance2D(mouse,me) + me.position
                     if GetDistance2D(me,victim) ~= 0 then
@@ -202,7 +247,7 @@ function Tick(tick)
                         Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
                     end
                 end
-                if IsKeyDown(DistanceKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload then
+                if IsKeyDown(DistanceKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload and not balling then
                     local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange-JumpDistance)) / GetDistance2D(me,victim) + me.position
                     if GetDistance2D(me,victim) ~= 0 then
                         me:CastAbility(R,position)
@@ -211,12 +256,9 @@ function Tick(tick)
                 end
             end
             if victim then
-                if victim.visible and (IsKeyDown(StayKey) or IsKeyDown(BallKey)) then
+                if (IsKeyDown(StayKey) or IsKeyDown(BallKey)) then
                     me:Move(client.mousePosition)
-                elseif victim.visible and IsKeyDown(ChaseKey) then
-                    local xyz = SkillShot.PredictedXYZ(victim,me:GetTurnTime(victim)*1000+client.latency+500)
-                    me:Move(xyz)
-                elseif victim.visible and IsKeyDown(DistanceKey) then
+                elseif (IsKeyDown(DistanceKey) or IsKeyDown(ChaseKey)) then
                     me:Attack(victim)
                 else
                     me:Follow(victim)
@@ -230,7 +272,7 @@ function Tick(tick)
     elseif victim then
         if not reset then
             reset = client.gameTime
-        elseif (client.gameTime - reset) >= 3 then
+        elseif (client.gameTime - reset) >= 5 then
             victim = nil
         end
         start = false
