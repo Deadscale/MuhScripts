@@ -2,6 +2,7 @@ require("libs.ScriptConfig")
 require("libs.Utils")
 require("libs.TargetFind")
 require("libs.Animations")
+require("libs.Skillshot")
 
 -- Config --
 local config = ScriptConfig.new()
@@ -11,6 +12,7 @@ config:SetParameter("NoBall", "F", config.TYPE_HOTKEY)
 config:SetParameter("Distance", "E", config.TYPE_HOTKEY)
 config:SetParameter("Toggle", "X", config.TYPE_HOTKEY)
 config:SetParameter("Escape", "Z", config.TYPE_HOTKEY)
+config:SetParameter("AutoDodge", true)
 config:SetParameter("SKeyDistance", 400)
 config:SetParameter("EKeyDistance", 650)
 config:Load()
@@ -37,6 +39,9 @@ local monitor = client.screenSize.x/1600
 local F14 = drawMgr:CreateFont("F14","Tahoma",14*monitor,550*monitor) 
 local statusText = drawMgr:CreateText(-20*monitor,80*monitor,-1,"Targeting",F14) statusText.visible = false
 local toggleText  = drawMgr:CreateText(10*monitor,560*monitor,-1,"(" .. string.char(toggleKey) .. ") Hex + Silence",F14) toggleText.visible = false
+local activated = 0
+local visible_time = {}
+sleepTick = nil
 
 
 -- Load --
@@ -78,6 +83,7 @@ end
 function Tick(tick)
     me = entityList:GetMyHero()
     if not me then return end
+    if sleepTick and sleepTick > tick then return end
     local attackRange = 480
     local fountain = entityList:FindEntities({classId=CDOTA_Unit_Fountain})
     local myfountain = nil
@@ -90,13 +96,158 @@ function Tick(tick)
         statusText.visible = false
     end
         
-    for i,v in ipairs(fountain) do
-        if v.team == me.team then
-            myfountain = v
+    for h,z in ipairs(fountain) do
+        if z.team == me.team then
+            myfountain = z
         end
-        if v.team ~= me.team then
-            enemyfountain = v
+        if z.team ~= me.team then
+            enemyfountain = z
         end
+    end
+    
+    if config.AutoDodge == true then
+        local enemies = entityList:GetEntities({type = LuaEntity.TYPE_HERO, alive = true, team = me:GetEnemyTeam()})
+        for i,v in ipairs(enemies) do
+            if not v:IsIllusion() and not v.visible then
+                if visible_time[v.handle] then
+                    visible_time[v.handle] = nil
+                end
+            end
+            if not v:IsIllusion() and v.visible then
+                local Q = v:GetAbility(1)
+                local W = v:GetAbility(2)
+                local E = v:GetAbility(3)
+                local R = v:GetAbility(4)
+                local D = v:GetAbility(5)
+                local F = v:GetAbility(6)
+                local distance = GetDistance2D(v,me)                               
+                
+                if not visible_time[v.handle] then
+                    visible_time[v.handle] = client.gameTime
+                end
+                if v.classId == CDOTA_Unit_Hero_SkeletonKing then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 600 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_BountyHunter then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 480 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Sven then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 680 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Broodmother then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 780 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Chaos_Knight then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 580 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Dazzle then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 680 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Naga_Siren then
+                    if W and W.level > 0 and W.abilityPhase then
+                        if distance < 650+80 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Morphling then
+                    if W and W.level > 0 and W.abilityPhase then
+                        if distance < 980 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_PhantomAssassin then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 1280 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_PhantomLancer then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 750+80 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_QueenOfPain then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 600 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_VengefulSpirit then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 580 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Skywraith_Mage then
+                    if W and W.level > 0 and W.abilityPhase then
+                        if distance < 1680 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Tidehunter then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 780 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Tinker then
+                    if Q and Q.level > 0 and Q.abilityPhase then
+                        if distance < 620 then
+                            StormUlt()
+                        end
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Viper then
+                    if R and R.level > 0 and R.abilityPhase then
+                        if v:AghanimState() then
+                            rdist = 980
+                        else
+                            rdist = 580
+                        end
+                        if distance < rdist then
+                            StormUlt()
+                        end                       
+                    end
+                elseif v.classId == CDOTA_Unit_Hero_Lina then
+                    if R and R.level > 0 and R.abilityPhase then
+                        StormUlt()
+                    end
+                end
+                
+                local cast = entityList:GetEntities({classId=282})
+                local rocket = entityList:GetEntities({classId=CDOTA_BaseNPC})
+                local hit = entityList:GetProjectiles({source=v,target=me})
+                local projs = entityList:GetProjectiles({})
+                for i,k in ipairs(projs) do
+                    if k.target and k.target == me and k.source and k.source.team ~= me.team then
+                        if k.source.classId == CDOTA_Unit_Hero_Tinker and k.speed == 900 and k.source:GetAbility(2) and math.ceil(k.source:GetAbility(2).cd - 0.1) ==  math.ceil(k.source:GetAbility(2):GetCooldown(k.source:GetAbility(2).level)) then
+                            StormUlt()
+                        elseif k.source.classId == CDOTA_Unit_Hero_Ogre_Magi and k.speed == 1000 and k.source:GetAbility(2) and math.ceil(k.source:GetAbility(2).cd - 0.1) ==  math.ceil(k.source:GetAbility(2):GetCooldown(k.source:GetAbility(2).level)) then
+                            StormUlt()
+                        end
+                    end
+                end
+            end 
+        end
+        activated = 0
     end
         
     if IsKeyDown(EscapeKey) and SleepCheck("chill") then
@@ -105,6 +256,10 @@ function Tick(tick)
         
         if not R and tp and me:CanCast() and tp.cd == 0 and tp:CanBeCasted() then
             me:CastAbility(tp,myfountain.position)
+        end
+        
+        if R and not tp and me:CanCast() and R:CanBeCasted() then
+            me:CastAbility(R,myfountain.position)
         end
         
         if R and R:CanBeCasted() and me:CanCast() and tp and tp.cd == 0 and me.mana > (R.manacost + tp.manacost) and not me:IsChanneling() then
@@ -276,6 +431,32 @@ function Tick(tick)
             victim = nil
         end
         start = false
+    end
+end
+
+function StormUlt()
+	if activated == 0 then
+    local me = entityList:GetMyHero()
+        if me:GetAbility(4) then
+            if me:CanCast() and me:GetAbility(4):CanBeCasted() then
+                me:CastAbility(me:GetAbility(4),me.position)
+                activated=1
+                sleepTick= GetTick() +600
+			end
+        end
+    end
+end
+
+function StormUltBack()
+	if activated == 0 then
+    local me = entityList:GetMyHero()
+        if me:GetAbility(4) then
+            if me:CanCast() and me:GetAbility(4):CanBeCasted() then
+                me:CastAbility(me:GetAbility(4),Vector((me.position.x) - 100 ,(me.position.y) - 100 ,(me.position.z) - 100))
+                activated=1
+                sleepTick= GetTick() +600
+			end
+        end
     end
 end
 
