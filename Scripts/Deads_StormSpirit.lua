@@ -12,7 +12,7 @@ config:SetParameter("NoBall", "F", config.TYPE_HOTKEY)
 config:SetParameter("Distance", "E", config.TYPE_HOTKEY)
 config:SetParameter("Toggle", "X", config.TYPE_HOTKEY)
 config:SetParameter("Escape", "Z", config.TYPE_HOTKEY)
-config:SetParameter("AutoDodge", true)
+config:SetParameter("AutoDisjoint", true)
 config:SetParameter("SKeyDistance", 400)
 config:SetParameter("EKeyDistance", 650)
 config:Load()
@@ -105,7 +105,7 @@ function Tick(tick)
         end
     end
     
-    if config.AutoDodge == true then
+    if config.AutoDisjoint == true then
         local enemies = entityList:GetEntities({type = LuaEntity.TYPE_HERO, alive = true, team = me:GetEnemyTeam()})
         for i,v in ipairs(enemies) do
             if not v:IsIllusion() and not v.visible then
