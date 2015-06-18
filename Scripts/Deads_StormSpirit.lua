@@ -446,19 +446,6 @@ function StormUlt()
     end
 end
 
-function StormUltBack()
-	if activated == 0 then
-    local me = entityList:GetMyHero()
-        if me:GetAbility(4) then
-            if me:CanCast() and me:GetAbility(4):CanBeCasted() then
-                me:CastAbility(me:GetAbility(4),Vector((me.position.x) - 100 ,(me.position.y) - 100 ,(me.position.z) - 100))
-                activated=1
-                sleepTick= GetTick() +600
-			end
-        end
-    end
-end
-
 -- Close --
 function GameClose()
     collectgarbage("collect")
