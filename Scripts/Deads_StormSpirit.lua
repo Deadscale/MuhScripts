@@ -41,7 +41,6 @@ local statusText = drawMgr:CreateText(-20*monitor,80*monitor,-1,"Targeting",F14)
 local toggleText  = drawMgr:CreateText(10*monitor,560*monitor,-1,"(" .. string.char(toggleKey) .. ") Hex + Silence",F14) toggleText.visible = false
 local activated = 0
 local visible_time = {}
-sleepTick = nil
 
 
 -- Load --
