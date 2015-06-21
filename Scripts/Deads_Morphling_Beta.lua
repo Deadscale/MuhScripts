@@ -124,15 +124,9 @@ function Tick(tick)
                     end
                     
                     
-                    if Q and Q.cd == 0 and me:CanCast() and distance <=950 then
-                        local CP = Q:FindCastPoint()
-                        local delay = CP*1000+client.latency+me:GetTurnTime(victim)*1000
-                        local speed = 1250
-                        local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
-                        if xyz then
-                            me:CastAbility(Q,xyz)
-                            Sleep(delay,"casting")
-                        end
+                    if Q and Q.cd == 0 and me:CanCast() and distance <= 950 then
+                    	me:CastAbility(Q,victim.position)
+		        Sleep((Q:FindCastPoint()*1000)+(me:GetTurnTime(victim)*1000),"casting")
                     end
                     
                     if eblade and eblade.cd == 0 and me:CanCast() and distance <= 750 then
@@ -144,7 +138,7 @@ function Tick(tick)
                         if (eblade and victim:IsAttackImmune() == true) then
                             me:CastAbility(W,victim)
                             Sleep(me:GetTurnTime(victim)*1000,"casting")
-                        elseif not eblade then
+                        elseif not eblade or (eblade and eblade.cd ~= 0 and victim:IsAttackImmune() == false) then
                             me:CastAbility(W,victim)
                             Sleep(me:GetTurnTime(victim)*1000,"casting")
                         end
