@@ -80,6 +80,7 @@ end
 
 -- Main --
 function Tick(tick)
+    if client.chat or client.console or client.loading then return end
     me = entityList:GetMyHero()
     if not me then return end
     if sleepTick and sleepTick > tick then return end
