@@ -57,7 +57,7 @@ function Load()
             reset = nil
             toggleText.visible = true
             script:RegisterEvent(EVENT_KEY,Key)
-            script:RegisterEvent(EVENT_TICK,Tick)
+            script:RegisterEvent(EVENT_FRAME,Tick)
             script:UnregisterEvent(Load)
         end
     end
@@ -460,9 +460,9 @@ function GameClose()
         reset = nil
         script:UnregisterEvent(Key)
         script:UnregisterEvent(Tick)
-        script:RegisterEvent(EVENT_TICK,Load)
+        script:RegisterEvent(EVENT_FRAME,Load)
     end
 end
 
 script:RegisterEvent(EVENT_CLOSE,GameClose)
-script:RegisterEvent(EVENT_TICK,Load)
+script:RegisterEvent(EVENT_FRAME,Load)
