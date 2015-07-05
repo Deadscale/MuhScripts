@@ -113,7 +113,7 @@ function Tick(tick)
                     visible_time[v.handle] = nil
                 end
             end
-            if not v:IsIllusion() and v.visible then
+            if not v:IsIllusion() and v.visible and (v:FindRelativeAngle(me) < 0.2 and v:FindRelativeAngle(me) > -0.2) then
                 local Q = v:GetAbility(1)
                 local W = v:GetAbility(2)
                 local E = v:GetAbility(3)
@@ -313,7 +313,7 @@ function Tick(tick)
                     me:CastAbility(Q)
                 end
                     
-                if IsKeyDown(ChaseKey) and R and R:CanBeCasted() and me:CanCast() and distance > attackRange and not balling then
+                if IsKeyDown(ChaseKey) and R and R:CanBeCasted() and me:CanCast() and distance > attackRange and not balling and not R.abilityPhase then
                     local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange-350)) / GetDistance2D(me,victim) + me.position
                     if GetDistance2D(me,victim) ~= 0 then
                         me:CastAbility(R,position)
@@ -321,7 +321,7 @@ function Tick(tick)
                     end
                 end
                 
-                if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance > attackRange+300 then
+                if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance > attackRange+300 and not balling and not R.abilityPhase then
                     local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange)) / GetDistance2D(me,victim) + me.position
                     if GetDistance2D(me,victim) ~= 0 then
                         me:CastAbility(R,position)
@@ -329,7 +329,7 @@ function Tick(tick)
                     end
                 end
                 
-                if IsKeyDown(DistanceKey) and R and R:CanBeCasted() and me:CanCast() and distance > attackRange+200 then
+                if IsKeyDown(DistanceKey) and R and R:CanBeCasted() and me:CanCast() and distance > attackRange+200 and not balling and not R.abilityPhase then
                     local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange-JumpDistance)) / GetDistance2D(me,victim) + me.position
                     if GetDistance2D(me,victim) ~= 0 then
                         me:CastAbility(R,position)
@@ -390,11 +390,11 @@ function Tick(tick)
                 local distance = GetDistance2D(victim,me)               
                 local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")                
                 
-                if IsKeyDown(ChaseKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange and not Overload and not balling then
+                if IsKeyDown(ChaseKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange and not Overload and not balling and not R.abilityPhase then
                     me:CastAbility(R,me.position)
                     Sleep(R:FindCastPoint()*1000, "casting")
                 end                
-                if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+300 and not Overload and not balling then
+                if IsKeyDown(StayKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+300 and not Overload and not balling and not R.abilityPhase then
                     local mouse = client.mousePosition
                     local xyz = (mouse - me.position) * StayDistance / GetDistance2D(mouse,me) + me.position
                     if GetDistance2D(me,victim) ~= 0 then
@@ -402,7 +402,7 @@ function Tick(tick)
                         Sleep(R:FindCastPoint()*1000+me:GetTurnTime(victim)*1000, "casting")
                     end
                 end
-                if IsKeyDown(DistanceKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload and not balling then
+                if IsKeyDown(DistanceKey) and R and R:CanBeCasted() and me:CanCast() and distance < attackRange+200 and not Overload and not balling and not R.abilityPhase then
                     local position = (victim.position - me.position) * (GetDistance2D(me,victim) - (attackRange-JumpDistance)) / GetDistance2D(me,victim) + me.position
                     if GetDistance2D(me,victim) ~= 0 then
                         me:CastAbility(R,position)
@@ -441,7 +441,7 @@ function StormUlt()
             if me:CanCast() and me:GetAbility(4):CanBeCasted() then
                 me:CastAbility(me:GetAbility(4),me.position)
                 activated=1
-                sleepTick= GetTick() +600
+                sleepTick= GetTick() +500
 			end
         end
     end
