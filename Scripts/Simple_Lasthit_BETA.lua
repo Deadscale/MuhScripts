@@ -111,7 +111,7 @@ function Tick(tick)
             if (megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower) and 
             (megaplayer.target.alive == true and megaplayer.target.visible == true and megaplayer.target ~= nil) then
                     
-                if qblade and (not (bfury or Tidebringer or megaplayer.target.classId == CDOTA_BaseNPC_Tower)) then
+                if qblade and (not (bfury or Tidebringer or megaplayer.target.classId == CDOTA_BaseNPC_Tower or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege)) then
                    if attackRange > 195 then
                         damage = me.dmgMin*1.15 + me.dmgBonus
                     else
@@ -119,7 +119,7 @@ function Tick(tick)
                     end
                 end
                 
-                if bfury and not (Tidebringer or megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
+                if bfury and not (Tidebringer or megaplayer.target.classId == CDOTA_BaseNPC_Tower or megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege) then
                     if attackRange > 195 then
                         damage = me.dmgMin*1.25 + me.dmgBonus
                     else
@@ -186,9 +186,6 @@ function Tick(tick)
                         damage = damage*1.8
                     end
                 end            
-                if megaplayer.target.team == me.team and qblade and not megaplayer.target.classId == CDOTA_BaseNPC_Tower then
-                    damage = me.dmgMin + me.dmgBonus
-                end
                 
                	if (me.classId == CDOTA_Unit_Hero_SkeletonKing or me.classId == CDOTA_Unit_Hero_ChaosKnight) and me.activity == 426 and not (megaplayer.target.classId == CDOTA_BaseNPC_Tower) then
 			local critabil = me:GetAbility(3)
@@ -224,6 +221,10 @@ function Tick(tick)
 
                 if megaplayer.target.classId == CDOTA_BaseNPC_Creep_Siege or megaplayer.target.classId == CDOTA_BaseNPC_Tower then
                     damage = damage*0.5
+                end
+                
+                if megaplayer.target.team == me.team and qblade and megaplayer.target.classId == CDOTA_BaseNPC_Creep_Lane then
+                    damage = me.dmgMin + me.dmgBonus
                 end
                 
                 toggleText.text = "(" .. string.char(toggleKey) .. ") Last Hit: On | Target HP = "..megaplayer.target.health.. "| Damage = "..(megaplayer.target:DamageTaken(damage,DAMAGE_PHYS,me))          
