@@ -82,7 +82,7 @@ function Kill(tick)
             me:Move(client.mousePosition)
             Sleep(150,"moving")
         end
-    if target and ((not target.alive) or (not target.visible)) then
+    elseif target and ((not target.alive) or (not target.visible)) then
         target = nil
     elseif target and IsKeyDown(ChaseKey) and (WillDie(target) or (GetDistance2D(target,me) > ledistance)) then
         target = nil
