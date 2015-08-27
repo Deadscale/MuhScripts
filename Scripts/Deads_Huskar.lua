@@ -21,6 +21,7 @@ local Registered = nil
 local attack = 0
 local move = 0
 local reg = false
+local ledistance = 0
 local monitor = client.screenSize.x/1600
 local F14 = drawMgr:CreateFont("F14","Tahoma",14*monitor,550*monitor) 
 local statusText = drawMgr:CreateText(-20*monitor,80*monitor,-1,"Targeting",F14) statusText.visible = false
@@ -66,6 +67,12 @@ function Kill(tick)
     local W = me:GetAbility(2)
     local R = me:GetAbility(4)
     
+    if R and R:CanBeCasted() and R.cd == 0 then
+        ledistance = 550
+    else
+        ledistance = me.attackRange
+    end
+    
     if not target then
         FindTarget()
         statusText.visible = false
@@ -73,21 +80,11 @@ function Kill(tick)
             me:Move(client.mousePosition)
             Sleep(150,"moving")
         end
-    elseif target and IsKeyDown(ChaseKey) and (WillDie(target) or (GetDistance2D(target,me) > attackRange) or target.health > 0 or (not target.visible)) and SleepCheck("LeUlt") then
-        if me:CanCast() and R and R.level > 0 and R:CanBeCasted() and GetDistance2D(target,me) > 550 then
-            me:CastAbility(R,target)
-            Sleep(1000,"LeUlt")
-            return
-        end
+    if target and ((not target.alive) or (not target.visible)) then
         target = nil
-    elseif target and IsKeyDown(KillKey) and (target.health > 0 or (not target.visible)) and SleepCheck("LeUlt") then
-        if me:CanCast() and R and R.level > 0 and R:CanBeCasted() and GetDistance2D(target,me) > 550 then
-            me:CastAbility(R,target)
-            Sleep(1000,"LeUlt")
-            return
-        end
+    elseif target and IsKeyDown(ChaseKey) and (WillDie(target) or (GetDistance2D(target,me) > ledistance)) then
         target = nil
-    elseif target and IsKeyDown(HarassKey) and (WillDie(target) or target.health > 0 or (not target.visible)) and SleepCheck("LeUlt") then
+    elseif target and IsKeyDown(HarassKey) and WillDie(target) then
         target = nil
     end
     
@@ -103,11 +100,18 @@ function Kill(tick)
                 local armlet = me:FindItem("item_armlet")
                 local halberd = me:FindItem("item_heavens_halberd")
                 local armmod = me:DoesHaveModifier("modifier_item_armlet_unholy_strength")
+                local solarcrest = me:FindItem("item_solar_crest")
                 
-                if R and R:CanBeCasted() and me:CanCast() and (not IsKeyDown(HarassKey)) then
-                    if target.health > target.maxHealth*0.50 then
-                        me:CastAbility(R,target)
-                        Sleep(R:FindCastPoint()+client.latency/3+150,"casting")
+                if R and R:CanBeCasted() and me:CanCast() and (not IsKeyDown(HarassKey)) and GetDistance2D(target,me) < 550 then                   
+                    if (target.health > target.maxHealth*0.50 or GetDistance2D(target,me) > attackRange) then
+                        if solarcrest and solarcrest.cd == 0 and solarcrest:CanBeCasted() then
+                            me:CastAbility(solarcrest,target)
+                            me:CastAbility(R,target)
+                            Sleep(R:FindCastPoint()+client.latency/3+150,"casting")
+                        else                            
+                            me:CastAbility(R,target)
+                            Sleep(R:FindCastPoint()+client.latency/3+150,"casting")
+                        end
                     end
                 end
                 
@@ -255,6 +259,7 @@ function GameClose()
         Registered = nil
         attack = nil
         move = nil
+        ledistance = nil
         reg = false
         script:UnregisterEvent(Key)
         script:RegisterEvent(EVENT_TICK,Load)
