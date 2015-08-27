@@ -8,12 +8,14 @@ config:SetParameter("Fight", "D", config.TYPE_HOTKEY)
 config:SetParameter("Kill", "F", config.TYPE_HOTKEY)
 config:SetParameter("Harass", "E", config.TYPE_HOTKEY)
 config:SetParameter("Armlet", true)
+config:SetParameter("AutoQ", true)
 config:Load()
 
 local ChaseKey = config.Fight
 local KillKey = config.Kill
 local HarassKey = config.Harass
 local ArmletSetting = config.Armlet
+local AutoQ = config.AutoQ
 
 -- Globals --
 local target = nil
@@ -115,7 +117,7 @@ function Kill(tick)
                     end
                 end
                 
-                if Q and Q:CanBeCasted() and me.health < me.maxHealth*0.4 and me:CanCast() then
+                if Q and Q:CanBeCasted() and me.health < me.maxHealth*0.4 and me:CanCast() and AutoQ then
                     me:CastAbility(Q,me)
                     Sleep(Q:FindCastPoint()+client.latency/3+150,"casting")
                 end
